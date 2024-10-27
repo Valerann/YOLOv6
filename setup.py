@@ -8,16 +8,19 @@ install_requires = []
 if os.path.isfile(requirements_path):
     with open(requirements_path) as f:
         install_requires = f.read().splitlines()
-print("1:",install_requires)
+
 # remove comments
 _install_requires = []
 for req in install_requires:
     idx = req.find("#")
-    req = req[:idx]
-    if req:
+    if idx == -1:
         _install_requires.append(req)
+    else:
+        req = req[:idx]
+        if req:
+            _install_requires.append(req)
 install_requires = _install_requires
-print("2:",install_requires)
+
 setup(
     name='yolov6',
     version='0.1.0',
