@@ -39,7 +39,7 @@ def safe_download(file, url, url2=None, min_bytes=1E0, error_msg=''):
             file.unlink(missing_ok=True)  # remove partial downloads
             raise Exception(error_msg or assert_msg)  # raise informative error
 
-def attempt_download(file, repo='meituan/YOLOv6', release='0.4.1'):
+def attempt_download(file, repo='meituan/YOLOv6', release='0.4.0'):
     def github_assets(repository, version='latest'):
         response = requests.get(f'https://api.github.com/repos/{repository}/releases/tags/{version}').json()  # github api
         return response['tag_name'], [x['name'] for x in response['assets']]  # tag, assets
