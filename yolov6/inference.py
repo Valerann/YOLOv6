@@ -1,5 +1,6 @@
 import math
 import torch
+import cv2
 from PIL import Image
 
 from yolov6.utils.downloads import attempt_download_from_hub, attempt_download
@@ -47,16 +48,18 @@ class YOLOV6:
         weights="weights/yolov6s.pt",
         device="cpu",
         hf_model=False,
+        model_release = "0.4.0"
     ):
 
         self.__dict__.update(locals())
         self.device = device
         self.half = False
+
         # Load model
         if hf_model:
             self.weights = attempt_download_from_hub(weights, hf_token=None)
         else:
-            self.weights = attempt_download(weights)
+            self.weights = attempt_download(weights,model_release)
         model = self.load_model()
         self.stride = model.stride
 
@@ -85,7 +88,7 @@ class YOLOV6:
         self.model = model
         return model
 
-    def predict(self, image:Image, img_size=640):
+    def predict(self, cv2image:Image, img_size=640):
         img_size = check_img_size(img_size, s=self.stride)
         if self.device != "cpu":
             self.model(
@@ -94,7 +97,7 @@ class YOLOV6:
                 .type_as(next(self.model.model.parameters()))
             )  # warmup
 
-        img, img_src = Inferer.process_image(image, img_size, self.stride, self.half)
+        img, img_src = Inferer.process_image(cv2image, img_size, self.stride, self.half)
         img = img.to(self.device)
         if len(img.shape) == 3:
             img = img[None]
@@ -113,8 +116,8 @@ class YOLOV6:
                 class_num = int(cls)  # integer class
                 label = f"{COCO_CLASSES[class_num]} {conf:.2f}"
                 Inferer.plot_box_and_label(
-                    image,
-                    max(round(sum(image.shape) / 2 * 0.001), 2),
+                    cv2image,
+                    max(round(sum(cv2image.shape) / 2 * 0.001), 2),
                     xyxy,
                     label,
                     color=Inferer.generate_colors(class_num, True),
